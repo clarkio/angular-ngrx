@@ -7,9 +7,9 @@ import { filter, share, takeUntil, tap } from 'rxjs/operators';
 import { EntityAction, EntityActions } from './entity.actions';
 import { Dictionary } from './ngrx-entity-models';
 
-import { EntityCache, ENTITY_CACHE_NAME_TOKEN } from './interfaces';
+import { EntityCache, ENTITY_CACHE_NAME_TOKEN, CREATE_ENTITY_DISPATCHER_TOKEN } from './interfaces';
 import { EntityDefinitionService } from './entity-definition.service';
-import { EntityDispatcher } from './entity-dispatcher';
+import { EntityDispatcher, CreateEntityDispatcher } from './entity-dispatcher';
 import { createEntitySelectors$, EntitySelectors$ } from './entity.selectors';
 
 // tslint:disable:member-ordering
@@ -85,6 +85,7 @@ export class EntityServiceFactory {
 
   constructor(
     @Inject(ENTITY_CACHE_NAME_TOKEN) private cacheName: string,
+    @Inject(CREATE_ENTITY_DISPATCHER_TOKEN) private createEntityDispatcher: CreateEntityDispatcher,
     private actions$: EntityActions,
     private entityDefinitionService: EntityDefinitionService,
     private store: Store<EntityCache>
@@ -96,7 +97,7 @@ export class EntityServiceFactory {
   create<T>(entityName: string): EntityService<T> {
     entityName = entityName.trim();
     const def = this.entityDefinitionService.getDefinition<T>(entityName);
-    const dispatcher = new EntityDispatcher<T>(entityName, this.store, def.selectId);
+    const dispatcher = this.createEntityDispatcher<T>(entityName, this.store, def.selectId);
     const selectors$ = createEntitySelectors$<T>(
       entityName,
       this.cacheSelector,

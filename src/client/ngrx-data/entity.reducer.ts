@@ -4,7 +4,7 @@ import { IdSelector, Update } from './ngrx-entity-models';
 
 import { EntityAction, EntityOp } from './entity.actions';
 import { EntityMetadata } from './entity-metadata';
-import { EntityCollection, EntityDefinitions } from './entity-definition';
+import { EntityCollection } from './entity-definition';
 import { EntityDefinitionService } from './entity-definition.service';
 import { EntityCache } from './interfaces';
 
@@ -26,7 +26,7 @@ export function createEntityReducer(entityDefinitionService: EntityDefinitionSer
       return state; // not an EntityAction
     }
 
-    const def = entityDefinitionService.definitions[entityName];
+    const def = entityDefinitionService.getDefinition(entityName);
     if (!def) {
       throw new Error(`The entity "${entityName}" type is not defined.`);
     }

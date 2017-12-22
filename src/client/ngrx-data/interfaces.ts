@@ -7,26 +7,40 @@ import { EntityMetadataMap } from './entity-metadata';
 import { IdSelector, Update } from './ngrx-entity-models';
 
 export class DataServiceError<T = any> {
-  constructor(public error: any, public requestData: RequestData) {}
+  readonly message: string;
+  constructor(public error: any, public requestData: RequestData) {
+    console.error(error, requestData);
+    this.message =
+      (error.error && error.error.message) ||
+      (error.message ||
+      (error.body && error.body.error) ||
+       error).toString();
+  }
 }
 
 export const ENTITY_CACHE_NAME = 'entityCache';
 export const ENTITY_CACHE_NAME_TOKEN = new InjectionToken<string>('ENTITY_CACHE_NAME');
+export const CREATE_ENTITY_DISPATCHER_TOKEN = new InjectionToken<string>('CREATE_ENTITY_DISPATCHER');
 export const ENTITY_METADATA_TOKEN = new InjectionToken<EntityMetadataMap>('ENTITY_METADATA');
 export const ENTITY_REDUCER_TOKEN = new InjectionToken<ActionReducer<EntityCache>>(
-  'Entity Reducer'
+  'ENTITY_REDUCER'
 );
 export const PLURAL_NAMES_TOKEN = new InjectionToken<{ [name: string]: string }>('PLURAL_NAMES');
 
 export abstract class EntityCollectionDataService<T> {
+  abstract readonly name: string;
+
+  /** Remove leading & trailing spaces or slashes */
+  static normalizeApi(api: string) {
+    return api.replace(/^[\/\s]+|[\/\s]+$/g, '');
+  }
+
   abstract add(entity: T): Observable<T>;
   abstract delete(id: any): Observable<null>;
   abstract getAll(): Observable<T[]>;
   abstract getById(id: any): Observable<T>;
   abstract update(update: Update<T>): Observable<Update<T>>;
 }
-
-export type entityName<T extends Object> = new (...x: any[]) => T;
 
 export interface EntityCache {
   // Must be `any` since we don't know what type of collections we will have
