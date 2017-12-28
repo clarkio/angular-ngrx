@@ -61,20 +61,28 @@ export class EntityAction implements Action {
     return `${op} [${entityName}]`.toUpperCase();
     // return `[${entityName}] ${op.toUpperCase()} `; // an alternative
   }
-
+  /** Create a new EntityAction from properties or another EntityAction */
   constructor(
     nameOrAction: string | EntityAction,
-    public readonly op: EntityOp,
+    public readonly op?: EntityOp,
     public readonly payload?: any
   ) {
-    this.entityName = (nameOrAction instanceof EntityAction
-      ? nameOrAction.entityName
-      : nameOrAction
-    ).trim();
-    if (op == null) {
-      throw new Error('Missing EntityOp for new action');
+    if (nameOrAction instanceof EntityAction) {
+      this.entityName = nameOrAction.entityName;
+      this.op = this.op || nameOrAction.op;
+      if (arguments.length < 3) {
+        this.payload = nameOrAction.payload;
+      }
+    } else {
+      if (nameOrAction == null) {
+        throw new Error('Missing entity name for new action')
+      };
+      this.entityName = nameOrAction.trim();
+      if (op == null) {
+        throw new Error('Missing EntityOp for new action');
+      }
     }
-    this.type = EntityAction.formatActionTypeName(op, this.entityName);
+    this.type = EntityAction.formatActionTypeName(this.op, this.entityName);
   }
 }
 
